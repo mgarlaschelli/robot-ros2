@@ -26,6 +26,7 @@ setup(
         'console_scripts': [
             'control = robot_control.robot_controller:main',
             'move = robot_control.robot_movement:main',
+            'joystick = robot_control.robot_joystick:main',
         ],
     },
 )

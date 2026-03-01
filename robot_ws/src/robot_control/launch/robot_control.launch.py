@@ -24,4 +24,10 @@ def generate_launch_description():
                 {"max_duty_cycle": 50},
             ]
         ),
+        Node(
+            package='robot_control',
+            namespace='robot01',
+            executable='joystick',
+            name='joystick',
+        ),
     ])
