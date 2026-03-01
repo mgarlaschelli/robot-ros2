@@ -1,6 +1,8 @@
+from glob import glob
+import os
 from setuptools import find_packages, setup
 
-package_name = 'camjam_sensors'
+package_name = 'robot_control'
 
 setup(
     name=package_name,
@@ -10,18 +12,20 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name, 'launch'),
+            glob(os.path.join('launch', '*launch.[pxy][yma]*'))),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='mike',
-    maintainer_email='mikelikesrobots@outlook.com',
-    description='Package for CamJam EduKit #3 to publish readings from the sensors',
+    maintainer='mg',
+    maintainer_email='xgarla@gmail.com',
+    description='Package to control the robot',
     license='MIT-0',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'distance = camjam_sensors.hcsr04:main',
-            'line = camjam_sensors.line_sensor:main',
+            'control = robot_control.robot_controller:main',
+            'move = robot_control.robot_movement:main',
         ],
     },
 )

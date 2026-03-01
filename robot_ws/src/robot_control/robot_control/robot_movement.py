@@ -14,9 +14,9 @@ DEFAULT_PWM_FREQUENCY = 20  # Hz
 DEFAULT_FULL_SPEED_DUTY_CYCLE = 40  # %
 
 
-class CamjamMovement(Node):
+class RobotMovement(Node):
     def __init__(self):
-        super().__init__("camjam_controller")
+        super().__init__("robot_controller")
 
         # Declare and set parameters
         self.declare_parameter("motor_a_forward_pin", DEFAULT_PIN_A_FWD)
@@ -56,7 +56,7 @@ class CamjamMovement(Node):
             self._vel_callback,
             10
         )
-        self.get_logger().info("Camjam movement init complete!")
+        self.get_logger().info("Robot movement init complete!")
 
     def _vel_callback(self, msg: Twist):
         fwd = msg.linear.x
@@ -84,7 +84,7 @@ class CamjamMovement(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    movement = CamjamMovement()
+    movement = RobotMovement()
 
     rclpy.spin(movement)
 
