@@ -1,0 +1,105 @@
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.panel-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.mode-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: var(--border);
+  color: var(--text-muted);
+}
+
+.mode-badge.mode-standby { background: #1e2a3a; color: #7ba7d4; }
+.mode-badge.mode-patrol  { background: #1e3a22; color: #52b788; }
+.mode-badge.mode-manual  { background: #3a2a1e; color: #e0a352; }
+
+.mode-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.mode-btn {
+  padding: 0.75rem 0.5rem;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+.mode-btn:hover:not(:disabled) {
+  border-color: currentColor;
+  color: var(--text);
+}
+
+.mode-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mode-btn.mode-standby { color: #7ba7d4; }
+.mode-btn.mode-standby.active {
+  background: #1e2a3a;
+  border-color: #7ba7d4;
+  color: #7ba7d4;
+  box-shadow: 0 0 12px rgba(123, 167, 212, 0.25);
+}
+
+.mode-btn.mode-patrol { color: #52b788; }
+.mode-btn.mode-patrol.active {
+  background: #1e3a22;
+  border-color: #52b788;
+  color: #52b788;
+  box-shadow: 0 0 12px rgba(82, 183, 136, 0.25);
+}
+
+.mode-btn.mode-manual { color: #e0a352; }
+.mode-btn.mode-manual.active {
+  background: #3a2a1e;
+  border-color: #e0a352;
+  color: #e0a352;
+  box-shadow: 0 0 12px rgba(224, 163, 82, 0.25);
+}
+
+.error-msg {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--danger);
+}

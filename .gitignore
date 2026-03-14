@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# ROS2 build artifacts
+build/
+install/
+log/
+
+# Node / frontend
+node_modules/
+dist/
+
+# Environment
+.env
+
+# OS
+.DS_Store

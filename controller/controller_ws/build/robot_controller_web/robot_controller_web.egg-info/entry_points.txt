@@ -1,0 +1,2 @@
+[console_scripts]
+web = robot_controller_web.main:ros_main
