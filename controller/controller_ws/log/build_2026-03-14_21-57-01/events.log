@@ -1,0 +1,37 @@
+[0.000000] (-) TimerEvent: {}
+[0.000189] (robot_controller_web) JobQueued: {'identifier': 'robot_controller_web', 'dependencies': OrderedDict()}
+[0.000537] (robot_controller_web) JobStarted: {'identifier': 'robot_controller_web'}
+[0.099997] (-) TimerEvent: {}
+[0.200295] (-) TimerEvent: {}
+[0.300599] (-) TimerEvent: {}
+[0.400939] (-) TimerEvent: {}
+[0.467705] (robot_controller_web) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'develop', '--editable', '--build-directory', '/workspace/controller_ws/build/robot_controller_web/build', '--no-deps', 'symlink_data'], 'cwd': '/workspace/controller_ws/build/robot_controller_web', 'env': {'HOSTNAME': 'mauro-HP-ProBook', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/lib', 'HOME': '/root', 'OLDPWD': '/workspace/controller_ws/src/robot_controller_web/frontend', 'ROS_PYTHON_VERSION': '3', 'ROS_DISTRO': 'jazzy', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'TERM': 'xterm', 'PATH': '/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'LANG': 'C.UTF-8', 'AMENT_PREFIX_PATH': '/opt/ros/jazzy', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'PWD': '/workspace/controller_ws/build/robot_controller_web', 'LC_ALL': 'C.UTF-8', 'PYTHONPATH': '/workspace/controller_ws/build/robot_controller_web/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/workspace/controller_ws/install/robot_controller_web/lib/python3.12/site-packages:/opt/ros/jazzy/lib/python3.12/site-packages:/workspace/controller_ws/install/robot_controller_web/lib/python3.12/site-packages', 'COLCON': '1'}, 'shell': False}
+[0.501032] (-) TimerEvent: {}
+[0.601275] (-) TimerEvent: {}
+[0.661415] (robot_controller_web) StdoutLine: {'line': b'running develop\n'}
+[0.701365] (-) TimerEvent: {}
+[0.750733] (robot_controller_web) StdoutLine: {'line': b'running egg_info\n'}
+[0.750929] (robot_controller_web) StdoutLine: {'line': b'creating robot_controller_web.egg-info\n'}
+[0.759583] (robot_controller_web) StdoutLine: {'line': b'writing robot_controller_web.egg-info/PKG-INFO\n'}
+[0.759834] (robot_controller_web) StdoutLine: {'line': b'writing dependency_links to robot_controller_web.egg-info/dependency_links.txt\n'}
+[0.760002] (robot_controller_web) StdoutLine: {'line': b'writing entry points to robot_controller_web.egg-info/entry_points.txt\n'}
+[0.760126] (robot_controller_web) StdoutLine: {'line': b'writing requirements to robot_controller_web.egg-info/requires.txt\n'}
+[0.760217] (robot_controller_web) StdoutLine: {'line': b'writing top-level names to robot_controller_web.egg-info/top_level.txt\n'}
+[0.760321] (robot_controller_web) StdoutLine: {'line': b"writing manifest file 'robot_controller_web.egg-info/SOURCES.txt'\n"}
+[0.778433] (robot_controller_web) StdoutLine: {'line': b"reading manifest file 'robot_controller_web.egg-info/SOURCES.txt'\n"}
+[0.778998] (robot_controller_web) StdoutLine: {'line': b"writing manifest file 'robot_controller_web.egg-info/SOURCES.txt'\n"}
+[0.788629] (robot_controller_web) StdoutLine: {'line': b'running build_ext\n'}
+[0.788761] (robot_controller_web) StdoutLine: {'line': b'Creating /workspace/controller_ws/install/robot_controller_web/lib/python3.12/site-packages/robot-controller-web.egg-link (link to .)\n'}
+[0.789331] (robot_controller_web) StdoutLine: {'line': b'Installing web script to /workspace/controller_ws/install/robot_controller_web/lib/robot_controller_web\n'}
+[0.789464] (robot_controller_web) StdoutLine: {'line': b'\n'}
+[0.789597] (robot_controller_web) StdoutLine: {'line': b'Installed /workspace/controller_ws/build/robot_controller_web\n'}
+[0.789710] (robot_controller_web) StdoutLine: {'line': b'running symlink_data\n'}
+[0.789805] (robot_controller_web) StdoutLine: {'line': b'creating /workspace/controller_ws/install/robot_controller_web/share/ament_index\n'}
+[0.789896] (robot_controller_web) StdoutLine: {'line': b'creating /workspace/controller_ws/install/robot_controller_web/share/ament_index/resource_index\n'}
+[0.790014] (robot_controller_web) StdoutLine: {'line': b'creating /workspace/controller_ws/install/robot_controller_web/share/ament_index/resource_index/packages\n'}
+[0.790108] (robot_controller_web) StdoutLine: {'line': b'symbolically linking /workspace/controller_ws/build/robot_controller_web/resource/robot_controller_web -> /workspace/controller_ws/install/robot_controller_web/share/ament_index/resource_index/packages\n'}
+[0.790205] (robot_controller_web) StdoutLine: {'line': b'symbolically linking /workspace/controller_ws/build/robot_controller_web/package.xml -> /workspace/controller_ws/install/robot_controller_web/share/robot_controller_web\n'}
+[0.801490] (-) TimerEvent: {}
+[0.812792] (robot_controller_web) CommandEnded: {'returncode': 0}
+[0.820356] (robot_controller_web) JobEnded: {'identifier': 'robot_controller_web', 'rc': 0}
+[0.820928] (-) EventReactorShutdown: {}

@@ -2,9 +2,16 @@
 
 A ROS2 Jazzy autonomous robot control system designed to run on a Raspberry Pi. The robot uses an HC-SR04 ultrasonic distance sensor to detect obstacles and a differential drive motor system for movement.
 
-## Architecture
+## Repository Layout
 
-The system is organized as a ROS2 workspace (`robot_ws`) with two packages:
+```
+robot/      # ROS2 workspace — runs on the Raspberry Pi
+controller/ # Web controller — runs on PC via Docker
+```
+
+## Robot Architecture
+
+The robot workspace (`robot/robot_ws`) contains two packages:
 
 ```
 robot_ws/src/
@@ -71,7 +78,7 @@ While in PATROL mode, `robot_controller` runs a reactive obstacle avoidance loop
 
 ---
 
-## Run
+## Run (on Raspberry Pi)
 
 ```bash
 source /opt/ros/jazzy/setup.bash
@@ -101,7 +108,7 @@ ros2 run robot_control move
 ros2 run robot_control joystick
 ```
 
-### Switching Modes
+### Switching Modes (CLI)
 
 ```bash
 # Switch to PATROL (autonomous obstacle avoidance)
@@ -119,6 +126,108 @@ Monitor the current mode:
 ```bash
 ros2 topic echo /robot01/controller/mode
 ```
+
+---
+
+## Web Controller
+
+A browser-based controller that runs on a PC in Docker. Requires only Docker installed on the host — no ROS2, Python, or Node.js needed locally.
+
+### Structure
+
+```
+controller/
+├── Dockerfile                  # ros:jazzy + Node.js 20 + FastAPI/uvicorn
+├── docker-compose.yml          # network_mode: host (required for DDS)
+├── .env                        # ROS_DOMAIN_ID=0
+├── scripts/
+│   ├── build.sh                # builds frontend + colcon workspace
+│   └── entrypoint.sh           # sources ROS2 setup, launches uvicorn
+└── controller_ws/src/robot_controller_web/
+    ├── robot_controller_web/
+    │   ├── ros_node.py         # rclpy node (spin thread, service clients)
+    │   └── main.py             # FastAPI app (REST + WebSockets)
+    └── frontend/               # React + Vite + TypeScript
+        └── src/components/
+            ├── ModePanel.tsx   # STAND_BY / PATROL / MANUAL buttons
+            └── JoystickPanel.tsx # Arrow buttons + animated joystick dot
+```
+
+### API
+
+| Endpoint | Description |
+|---|---|
+| `POST /api/mode` `{"mode": "STAND_BY\|PATROL\|MANUAL"}` | Call the corresponding ROS2 service |
+| `GET /api/mode` | Return current operating mode |
+| `WS /ws/joystick` | Stream `{linear_x, angular_z}` → publishes to `/robot01/joy_cmd_vel` |
+| `WS /ws/mode` | Push current mode updates to the browser |
+
+### entrypoint.sh
+
+`scripts/entrypoint.sh` is the Docker `ENTRYPOINT` — it is executed automatically by the container on every `docker compose up` or `docker compose run`. **You never run it manually.** It sources `/opt/ros/jazzy/setup.bash` and, if the workspace has been built, sources `controller_ws/install/setup.bash`, then hands off to whatever command the container was started with (e.g. uvicorn).
+
+### First-time build
+
+Open a shell inside the container and run `build.sh`:
+
+```bash
+# From the repo root, on the host
+docker compose -f controller/docker-compose.yml run --rm controller \
+  bash /workspace/scripts/build.sh
+```
+
+`build.sh` performs both steps in order:
+
+**Step 1 — React frontend** (`npm run build`)
+
+Run directory: `/workspace/controller_ws/src/robot_controller_web/frontend`
+
+```bash
+cd /workspace/controller_ws/src/robot_controller_web/frontend
+npm install   # first time only
+npm run build # outputs to ../robot_controller_web/static/
+```
+
+**Step 2 — ROS2 package** (`colcon build`)
+
+Run directory: `/workspace/controller_ws`
+
+```bash
+cd /workspace/controller_ws
+colcon build --symlink-install --packages-select robot_controller_web
+```
+
+`--symlink-install` means Python source files are symlinked into the install tree, so backend changes are picked up by uvicorn's `--reload` without rebuilding.
+
+### Start
+
+```bash
+docker compose -f controller/docker-compose.yml up
+```
+
+Open `http://localhost:8000` in your browser.
+
+### Development workflow
+
+| What changed | Where to run | Command |
+|---|---|---|
+| Python backend (`main.py`, `ros_node.py`) | — | No action — uvicorn `--reload` picks it up automatically |
+| React frontend (`frontend/src/**`) | Inside the container, at `controller_ws/src/robot_controller_web/frontend/` | `npm run build` |
+| ROS2 package structure (`package.xml`, `setup.py`) | Inside the container, at `controller_ws/` | `colcon build --symlink-install --packages-select robot_controller_web` |
+
+To get a shell inside a running container:
+
+```bash
+docker compose -f controller/docker-compose.yml exec controller bash
+```
+
+Or start a fresh shell without launching uvicorn:
+
+```bash
+docker compose -f controller/docker-compose.yml run --rm controller bash
+```
+
+> **Note:** `network_mode: host` is required so DDS multicast can reach the Pi on the same LAN. This works on Linux Docker hosts.
 
 ---
 

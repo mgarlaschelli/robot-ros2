@@ -1,0 +1,11 @@
+services:
+  controller:
+    build: .
+    network_mode: host   # required for ROS2 DDS multicast to reach the Pi
+    environment:
+      - PYTHONPATH=/workspace/controller_ws/install/robot_controller_web/lib/python3.12/site-packages
+    volumes:
+      - ./controller_ws:/workspace/controller_ws
+      - ./scripts:/workspace/scripts
+    stdin_open: true
+    tty: true
