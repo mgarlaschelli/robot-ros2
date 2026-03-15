@@ -75,13 +75,18 @@ async def mode_ws(websocket: WebSocket):
     last_mode = None
     try:
         while True:
-            current = get_node().get_current_mode()
-            if current != last_mode:
-                last_mode = current
-                await websocket.send_text(json.dumps({"mode": current}))
+            node = get_node()
+            if node is not None:
+                current = node.get_current_mode()
+                if current != last_mode:
+                    last_mode = current
+                    await websocket.send_text(json.dumps({"mode": current}))
             await asyncio.sleep(0.2)
     except WebSocketDisconnect:
         pass
+    except Exception as exc:
+        import logging
+        logging.getLogger("mode_ws").error("mode_ws crashed: %s", exc)
 
 
 # ── Static files (built React app) ────────────────────────────────────────────

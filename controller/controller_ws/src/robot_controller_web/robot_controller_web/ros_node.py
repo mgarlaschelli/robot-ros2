@@ -2,9 +2,17 @@ import time
 import threading  # still used for _mode_lock and spin thread
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, DurabilityPolicy, ReliabilityPolicy, HistoryPolicy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import String
 from std_srvs.srv import Trigger
+
+_LATCHED_QOS = QoSProfile(
+    depth=1,
+    durability=DurabilityPolicy.TRANSIENT_LOCAL,
+    reliability=ReliabilityPolicy.RELIABLE,
+    history=HistoryPolicy.KEEP_LAST,
+)
 
 ROBOT_NS = "robot01"
 
@@ -21,12 +29,13 @@ class ControllerNode(Node):
             Twist, f"/{ROBOT_NS}/joy_cmd_vel", 10
         )
 
-        # Subscription: current mode feedback
+        # Subscription: current mode feedback — TRANSIENT_LOCAL matches the
+        # robot publisher so late joiners receive the last published mode.
         self.create_subscription(
             String,
             f"/{ROBOT_NS}/controller/mode",
             self._mode_callback,
-            10,
+            _LATCHED_QOS,
         )
 
         # Service clients for mode switching (named _mode_clients to avoid
