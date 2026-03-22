@@ -6,6 +6,14 @@ from geometry_msgs.msg import Twist
 from sensor_msgs.msg import Range
 from std_msgs.msg import String
 from std_srvs.srv import Trigger
+from rclpy.qos import QoSProfile, DurabilityPolicy, ReliabilityPolicy, HistoryPolicy
+
+_LATCHED_QOS = QoSProfile(
+    depth=1,
+    durability=DurabilityPolicy.TRANSIENT_LOCAL,
+    reliability=ReliabilityPolicy.RELIABLE,
+    history=HistoryPolicy.KEEP_LAST,
+)
 
 
 DEFAULT_AVOID_RANGE = 15  # cm
@@ -55,7 +63,7 @@ class RobotController(Node):
         # Publishers
         self.get_logger().info("Setting up publishers...")
         self._cmd_vel_pub = self.create_publisher(Twist, "cmd_vel", 10)
-        self._mode_pub = self.create_publisher(String, "controller/mode", 10)
+        self._mode_pub = self.create_publisher(String, "controller/mode", _LATCHED_QOS)
 
         # Subscriptions
         self.get_logger().info("Subscribing to topics...")
@@ -82,9 +90,23 @@ class RobotController(Node):
         self.get_logger().info("Setting up timer...")
         self.timer = self.create_timer(self._control_period, self._control_loop)
 
+        # Publish initial mode once DDS has had time to discover subscribers
+        self._startup_timer = self.create_timer(1.0, self._publish_initial_mode)
+
         self.get_logger().info(
             f"robot_control init complete. Operating mode: {self._operating_mode.value}"
         )
+
+    # ------------------------------------------------------------------
+    # Startup
+    # ------------------------------------------------------------------
+
+    def _publish_initial_mode(self):
+        msg = String()
+        msg.data = self._operating_mode.value
+        self._mode_pub.publish(msg)
+        self.get_logger().info(f"Published initial mode: {self._operating_mode.value}")
+        self._startup_timer.cancel()
 
     # ------------------------------------------------------------------
     # Mode switching

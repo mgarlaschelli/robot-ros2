@@ -45,11 +45,21 @@ export function createJoystickSocket(onOpen?: () => void): JoystickSocket {
 }
 
 export function createModeSocket(onMode: (mode: string) => void): () => void {
-  const protocol = location.protocol === 'https:' ? 'wss' : 'ws'
-  const ws = new WebSocket(`${protocol}://${location.host}/ws/mode`)
-  ws.onmessage = (e) => {
-    const data = JSON.parse(e.data) as { mode?: string }
-    if (data.mode) onMode(data.mode)
+  let ws: WebSocket | null = null
+  let cancelled = false
+
+  function connect() {
+    if (cancelled) return
+    const protocol = location.protocol === 'https:' ? 'wss' : 'ws'
+    ws = new WebSocket(`${protocol}://${location.host}/ws/mode`)
+    ws.onmessage = (e) => {
+      const data = JSON.parse(e.data) as { mode?: string }
+      if (data.mode) onMode(data.mode)
+    }
+    ws.onerror = () => ws?.close()
+    ws.onclose = () => { if (!cancelled) setTimeout(connect, 2000) }
   }
-  return () => ws.close()
+
+  connect()
+  return () => { cancelled = true; ws?.close() }
 }

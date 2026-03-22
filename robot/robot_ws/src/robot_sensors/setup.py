@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'distance = robot_sensors.hcsr04:main'
+            'distance = robot_sensors.hcsr04:main',
+            'camera   = robot_sensors.camera:main',
         ]
     }
 )

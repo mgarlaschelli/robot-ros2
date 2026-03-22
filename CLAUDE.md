@@ -1,3 +1,3 @@
 # CLAUDE.md
 
-A ROS2-based (jazzy) autonomous robot control system designed to run on a Raspberry Pi. 
+A ROS2-based (jazzy) autonomous robot control system designed to run on a Raspberry Pi with ubuntu 24 OS. 

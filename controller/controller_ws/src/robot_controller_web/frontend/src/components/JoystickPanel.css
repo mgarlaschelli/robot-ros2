@@ -3,6 +3,7 @@
   align-items: center;
   justify-content: center;
   gap: 2.5rem;
+  flex: 1;
 }
 
 /* Connection badge */

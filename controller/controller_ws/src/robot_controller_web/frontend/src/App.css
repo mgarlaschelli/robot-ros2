@@ -4,6 +4,28 @@
   gap: 1.5rem;
 }
 
+.app-layout {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.app-left {
+  min-width: 0;
+}
+
+.app-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 340px;
+}
+
+.app-right > * {
+  flex: 1;
+}
+
 .app-title {
   font-size: 1.5rem;
   font-weight: 700;

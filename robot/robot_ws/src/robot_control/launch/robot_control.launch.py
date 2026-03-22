@@ -10,6 +10,20 @@ def generate_launch_description():
             name='distance',
         ),
         Node(
+            package='robot_sensors',
+            namespace='robot01',
+            executable='camera',
+            name='camera',
+            parameters=[
+                {'device': '/dev/video0'},
+                {'subdev': '/dev/v4l-subdev0'},
+                {'fps': 15},
+                {'jpeg_quality': 80},
+                {'exposure': 500},
+                {'analogue_gain': 1023},
+            ]
+        ),
+        Node(
             package='robot_control',
             namespace='robot01',
             executable='control',
