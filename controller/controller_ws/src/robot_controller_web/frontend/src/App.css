@@ -4,6 +4,24 @@
   gap: 1.5rem;
 }
 
+.app-layout {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.app-left {
+  min-width: 0;
+}
+
+.app-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 340px;
+}
+
 .app-title {
   font-size: 1.5rem;
   font-weight: 700;

@@ -1,9 +1,11 @@
 import asyncio
 import json
 import pathlib
+import queue
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -87,6 +89,42 @@ async def mode_ws(websocket: WebSocket):
     except Exception as exc:
         import logging
         logging.getLogger("mode_ws").error("mode_ws crashed: %s", exc)
+
+
+# ── MJPEG camera stream ────────────────────────────────────────────────────────
+
+async def _mjpeg_generator():
+    """
+    Async generator bridging the ROS2 spin thread to the asyncio event loop.
+    Uses run_in_executor so queue.get(timeout) blocks a thread-pool worker,
+    not the event loop itself.
+    """
+    loop = asyncio.get_running_loop()
+    cam_queue = get_node().get_camera_queue()
+    boundary = b'--frame\r\nContent-Type: image/jpeg\r\n\r\n'
+    try:
+        while True:
+            try:
+                jpeg_bytes = await loop.run_in_executor(
+                    None, lambda: cam_queue.get(timeout=2.0)
+                )
+            except queue.Empty:
+                await asyncio.sleep(0.1)
+                continue
+            yield boundary + jpeg_bytes + b'\r\n'
+    except asyncio.CancelledError:
+        pass
+
+
+@app.get('/api/camera/stream')
+async def camera_stream():
+    node = get_node()
+    if node is None:
+        raise HTTPException(status_code=503, detail='ROS node not ready')
+    return StreamingResponse(
+        _mjpeg_generator(),
+        media_type='multipart/x-mixed-replace; boundary=frame',
+    )
 
 
 # ── Static files (built React app) ────────────────────────────────────────────

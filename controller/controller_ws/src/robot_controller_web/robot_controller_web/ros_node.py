@@ -1,9 +1,11 @@
+import queue
 import time
 import threading  # still used for _mode_lock and spin thread
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, DurabilityPolicy, ReliabilityPolicy, HistoryPolicy
 from geometry_msgs.msg import Twist
+from sensor_msgs.msg import CompressedImage
 from std_msgs.msg import String
 from std_srvs.srv import Trigger
 
@@ -11,6 +13,13 @@ _LATCHED_QOS = QoSProfile(
     depth=1,
     durability=DurabilityPolicy.TRANSIENT_LOCAL,
     reliability=ReliabilityPolicy.RELIABLE,
+    history=HistoryPolicy.KEEP_LAST,
+)
+
+_CAMERA_QOS = QoSProfile(
+    depth=1,
+    durability=DurabilityPolicy.VOLATILE,
+    reliability=ReliabilityPolicy.BEST_EFFORT,
     history=HistoryPolicy.KEEP_LAST,
 )
 
@@ -23,6 +32,7 @@ class ControllerNode(Node):
 
         self._current_mode = "UNKNOWN"
         self._mode_lock = threading.Lock()
+        self._camera_queue: queue.Queue = queue.Queue(maxsize=1)
 
         # Publisher: joystick velocity commands
         self._joy_pub = self.create_publisher(
@@ -36,6 +46,14 @@ class ControllerNode(Node):
             f"/{ROBOT_NS}/controller/mode",
             self._mode_callback,
             _LATCHED_QOS,
+        )
+
+        # Subscription: camera frames — BEST_EFFORT matches the Pi publisher QoS
+        self.create_subscription(
+            CompressedImage,
+            f'/{ROBOT_NS}/camera/compressed',
+            self._camera_callback,
+            _CAMERA_QOS,
         )
 
         # Service clients for mode switching (named _mode_clients to avoid
@@ -55,6 +73,18 @@ class ControllerNode(Node):
     def _mode_callback(self, msg: String):
         with self._mode_lock:
             self._current_mode = msg.data
+
+    def _camera_callback(self, msg: CompressedImage):
+        # Drain stale frame so the queue stays at depth 1 (drop old, keep new)
+        if self._camera_queue.full():
+            try:
+                self._camera_queue.get_nowait()
+            except queue.Empty:
+                pass
+        self._camera_queue.put_nowait(bytes(msg.data))
+
+    def get_camera_queue(self) -> queue.Queue:
+        return self._camera_queue
 
     def get_current_mode(self) -> str:
         with self._mode_lock:
