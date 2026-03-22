@@ -32,7 +32,7 @@ def debayer_pGAA(raw: np.ndarray, width: int, height: int) -> np.ndarray:
     flat = raw.reshape(-1)[:width * height * 10 // 8]
     groups = flat.reshape(height, width // 4, 5)   # (H, W/4, 5)
     bayer_8 = np.ascontiguousarray(groups[:, :, :4]).reshape(height, width)
-    return cv2.cvtColor(bayer_8, cv2.COLOR_BayerGB2BGR)
+    return cv2.cvtColor(bayer_8, cv2.COLOR_BayerGR2BGR)
 
 
 class CameraPublisher(Node):
