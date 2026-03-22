@@ -1,6 +1,6 @@
 # robot-ros2
 
-A ROS2 Jazzy autonomous robot control system designed to run on a Raspberry Pi. The robot uses an HC-SR04 ultrasonic distance sensor to detect obstacles and a differential drive motor system for movement.
+A ROS2 Jazzy autonomous robot control system designed to run on a Raspberry Pi. The robot uses an HC-SR04 ultrasonic distance sensor for obstacle detection, an OV5647 camera for live video streaming, and a differential drive motor system for movement.
 
 ## Repository Layout
 
@@ -15,7 +15,7 @@ The robot workspace (`robot/robot_ws`) contains two packages:
 
 ```
 robot_ws/src/
-├── robot_sensors/     # HC-SR04 distance sensor publisher
+├── robot_sensors/     # HC-SR04 distance sensor + OV5647 camera publisher
 └── robot_control/     # Controller, motor driver, joystick input
 ```
 
@@ -24,6 +24,7 @@ robot_ws/src/
 | Node | Package | Executable | Role |
 |---|---|---|---|
 | `hc_sr04_publisher` | `robot_sensors` | `distance` | Reads HC-SR04 sensor, publishes distance at 4 Hz |
+| `camera` | `robot_sensors` | `camera` | Captures OV5647 camera frames, publishes compressed JPEG at 15 Hz |
 | `robot_controller` | `robot_control` | `control` | Operating mode state machine, publishes velocity commands at 5 Hz |
 | `robot_movement` | `robot_control` | `move` | Translates velocity commands to PWM signals for the motors |
 | `robot_joystick` | `robot_control` | `joystick` | Reads Bluetooth joystick input, publishes velocity commands at 20 Hz |
@@ -33,6 +34,7 @@ robot_ws/src/
 | Topic | Type | Publisher → Subscriber |
 |---|---|---|
 | `/robot01/distance` | `sensor_msgs/Range` | `hc_sr04_publisher` → `robot_controller` |
+| `/robot01/camera/compressed` | `sensor_msgs/CompressedImage` | `camera` → web controller |
 | `/robot01/cmd_vel` | `geometry_msgs/Twist` | `robot_controller` → `robot_movement` |
 | `/robot01/joy_cmd_vel` | `geometry_msgs/Twist` | `robot_joystick` → `robot_controller` |
 | `/robot01/controller/mode` | `std_msgs/String` | `robot_controller` → (observers) |
@@ -44,6 +46,19 @@ robot_ws/src/
 | `/robot01/controller/set_standby` | `std_srvs/Trigger` | Switch to STAND_BY mode |
 | `/robot01/controller/set_patrol` | `std_srvs/Trigger` | Switch to PATROL mode |
 | `/robot01/controller/set_manual` | `std_srvs/Trigger` | Switch to MANUAL mode |
+
+### Camera Setup
+
+The `camera` node expects the OV5647 camera to be pre-configured before launch. Run the following script once after boot (or wire it into a systemd service):
+
+```bash
+media-ctl -d /dev/media0 --set-v4l2 '"ov5647 10-0036":0[fmt:SGBRG10_1X10/640x480]'
+v4l2-ctl -d /dev/video0 --set-fmt-video=width=640,height=480,pixelformat=pGAA
+v4l2-ctl -d /dev/v4l-subdev0 --set-ctrl=exposure=500
+v4l2-ctl -d /dev/v4l-subdev0 --set-ctrl=analogue_gain=1023
+```
+
+The node re-applies the exposure and gain controls on startup (since OpenCV's V4L2 format negotiation can reset them). The `sensor_entity`, `exposure`, and `analogue_gain` launch parameters can be adjusted in `robot_control.launch.py`.
 
 ### GPIO Pin Mapping (Raspberry Pi BCM)
 
@@ -145,11 +160,12 @@ controller/
 │   └── entrypoint.sh           # sources ROS2 setup, launches uvicorn
 └── controller_ws/src/robot_controller_web/
     ├── robot_controller_web/
-    │   ├── ros_node.py         # rclpy node (spin thread, service clients)
-    │   └── main.py             # FastAPI app (REST + WebSockets)
+    │   ├── ros_node.py         # rclpy node (spin thread, service clients, camera sub)
+    │   └── main.py             # FastAPI app (REST + WebSockets + MJPEG stream)
     └── frontend/               # React + Vite + TypeScript
         └── src/components/
-            ├── ModePanel.tsx   # STAND_BY / PATROL / MANUAL buttons
+            ├── CameraPanel.tsx   # Live MJPEG camera feed
+            ├── ModePanel.tsx     # STAND_BY / PATROL / MANUAL buttons
             └── JoystickPanel.tsx # Arrow buttons + animated joystick dot
 ```
 
@@ -159,6 +175,7 @@ controller/
 |---|---|
 | `POST /api/mode` `{"mode": "STAND_BY\|PATROL\|MANUAL"}` | Call the corresponding ROS2 service |
 | `GET /api/mode` | Return current operating mode |
+| `GET /api/camera/stream` | MJPEG stream of the robot camera feed |
 | `WS /ws/joystick` | Stream `{linear_x, angular_z}` → publishes to `/robot01/joy_cmd_vel` |
 | `WS /ws/mode` | Push current mode updates to the browser |
 
