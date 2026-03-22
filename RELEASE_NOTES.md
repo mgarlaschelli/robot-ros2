@@ -1,5 +1,27 @@
 # Release Notes
 
+## v1.1.0 — 22/03/2026
+
+### Features
+
+#### Robot (ROS2)
+- OV5647 Raspberry Pi camera integration via new `camera` node in `robot_sensors`
+- Publishes compressed JPEG frames at 15 Hz on `/robot01/camera/compressed` (BEST_EFFORT QoS)
+- Captures raw SGBRG10P (pGAA) Bayer frames, unpacks 10-bit packed data with NumPy, and debayers to colour with OpenCV
+- Re-applies sensor exposure and gain controls on startup to survive OpenCV's V4L2 format negotiation
+- Configurable parameters: `device`, `subdev`, `fps`, `jpeg_quality`, `exposure`, `analogue_gain`
+
+#### Controller (Web Console)
+- **Camera Feed panel**: live MJPEG stream served at `/api/camera/stream`, displayed left of the controls
+- Two-column layout: camera on the left, Operating Mode and Manual Control stacked on the right at equal height
+- MJPEG stream bridges the ROS2 spin thread to the asyncio event loop via `queue.Queue` and `run_in_executor`
+
+### Bug Fixes
+
+- None
+
+---
+
 ## v1.0.0 — 14/03/2026
 
 ### Features
